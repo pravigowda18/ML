@@ -1,0 +1,48 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from PIL import Image
+
+# Load the image
+image = Image.open('your_image_path.jpg')  # Update the image path
+image_gray = image.convert('L')  # Convert to grayscale
+
+# Convert the image to a numpy array
+image_array = np.array(image_gray)
+
+# Flatten the 2D image into a 2D matrix where each row is a pixel (flatten the image)
+original_shape = image_array.shape
+flattened_image = image_array.reshape(-1, original_shape[1])
+
+# Standardize the data (optional but improves PCA performance)
+scaler = StandardScaler()
+flattened_image_scaled = scaler.fit_transform(flattened_image)
+
+# Perform PCA
+n_components = 50  # You can adjust this number to change the number of principal components
+pca = PCA(n_components=n_components)
+pca_result = pca.fit_transform(flattened_image_scaled)
+
+# Reconstruct the image using the inverse of PCA transformation
+reconstructed_image = pca.inverse_transform(pca_result)
+reconstructed_image = scaler.inverse_transform(reconstructed_image)
+
+# Reshape the result back to the original image shape
+reconstructed_image = reconstructed_image.reshape(original_shape)
+
+# Plot the original and reconstructed images
+plt.figure(figsize=(10, 5))
+
+# Plot original image
+plt.subplot(1, 2, 1)
+plt.title("Original Image")
+plt.imshow(image_array, cmap='gray')
+
+# Plot reconstructed image
+plt.subplot(1, 2, 2)
+plt.title("Reconstructed Image with PCA")
+plt.imshow(reconstructed_image, cmap='gray')
+
+plt.show()
+
